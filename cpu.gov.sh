@@ -1,15 +1,15 @@
 #!/bin/bash
 valid_governors=(
-				powersave 
-				ondemand 
+				powersave
+				ondemand
 				performance
 				conservative
 				userspace)
 initd_file="cpu_gov"  #use name without sh for global use without sh out of /usr/bin
 first_cmd_arg="$1"
 second_cmd_arg="$2"
-			
-# testing if governor tests works and change of startup script				
+
+# testing if governor tests works and change of startup script
 function governor_changer {
     sudo echo $1 | sudo tee /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor > /dev/null 2>&1
     RESULT=$(cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor)
@@ -41,7 +41,7 @@ if [[ "$first_cmd_arg" == "--governor" ]] || [[ "$first_cmd_arg" == "-g" ]]; the
 	done
 	echo "$second_cmd_arg is not a valid governor"
 	exit
-fi 
+fi
 }
 
 function gui {
@@ -51,7 +51,7 @@ function gui {
 			"performance" "locks the CPU at maximum frequency"\
 			"conservative" "larger, more persistent load take place before CPU clockspeed will rise"\
 			"userspace" "allows any program executed by the user to set the CPU's operating frequency"		3>&1 1>&2 2>&3)
-	
+
 	exitstatus=$?
 	if [ $exitstatus = 0 ]; then
 		governor_changer "$OPTION"
@@ -74,8 +74,8 @@ function gui {
 					echo "Ok did not change threshold."
 				fi
 				exit
-			
-			else 
+
+			else
 				echo "Ok did not change threshold"
 				exit
 			fi
@@ -132,20 +132,6 @@ function threshold_input_handler {
 	fi
 }
 
-function help_command {
-	if [ "$first_cmd_arg" == "-h" ] || [ "$first_cmd_arg" == "--help" ]; then
-		echo "Usage:"
-		echo ""
-		echo "start with no arguments -> start with gui to choose governor" 
-		echo "-d	--dialog		use pseudo gui dialogs"
-		echo "-h	--help			display this help information"
-		echo "-s	--show			display active governor and threshold of ondemand if active"
-		echo "-g	--governor		give a valid cpu governor as argument two"
-		echo "-t	--treshold		changes governor to ondemand and give a valid ondemand threshold as argument two"
-		exit
-	fi
-}
-
 function show_state {
 if [ "$first_cmd_arg" == "-s" ] || [ "$first_cmd_arg" == "--show" ]; then
 	RESULT=$(cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor)
@@ -176,32 +162,32 @@ function dialog_handler {
 					governor_changer "ondemand"
 					read -p "change CPU boost threshold (empty leaves default): " threshold
 					threshold=${threshold:-95}
-					if [[ $threshold != 95 ]]; then 
+					if [[ $threshold != 95 ]]; then
 						change_up_threshold $threshold
 					fi
 					break
 					;;
-					
+
 				"performance")
 					governor_changer "performance"
 					break
 					;;
-					
+
 				"userspace")
 					governor_changer "userspace"
 					break
 					;;
-					
+
 				"conservative")
 					governor_changer "conservative"
 					read -p "change CPU boost threshold (empty leaves default): " threshold
 					threshold=${threshold:-80}
-					if [[ $threshold != 80 ]]; then 
+					if [[ $threshold != 80 ]]; then
 						change_up_threshold $threshold
-					fi		
+					fi
 					break
 					;;
-					
+
 				"Cancel")
 					exit
 					;;
@@ -212,10 +198,36 @@ function dialog_handler {
 	fi
 }
 
+function help_display {
+	echo "Usage:"
+	echo ""
+	echo "start with no arguments -> start with gui to choose governor" 
+	echo "-d	--dialog		use pseudo gui dialogs"
+	echo "-h	--help			display this help information"
+	echo "-s	--show			display active governor and threshold of ondemand if active"
+	echo "-g	--governor		give a valid cpu governor as argument two"
+	echo "-t	--treshold		changes governor to ondemand and give a valid ondemand threshold as argument two"
+}
+
+function check_invalid_args_and_help {
+
+if [ "$first_cmd_arg" == "-h" ] || [ "$first_cmd_arg" == "--help" ]; then
+	help_display
+	exit
+fi
+
+if [[ -z "${first_cmd_arg// }" ]] && [[ -z "${second_cmd_arg// }" ]]; then
+	echo "No valid command line argument given. starting gui"
+else
+	echo "Invalid arguments given. Please use this:"
+	help_display
+	exit
+fi
+}
+
 show_state
-help_command
 governor_cmd
 threshold_input_handler
 dialog_handler
-echo "No valid command line argument given. starting gui"
+check_invalid_args_and_help
 gui
