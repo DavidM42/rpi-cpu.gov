@@ -56,7 +56,7 @@ function gui {
 	if [ $exitstatus = 0 ]; then
 		governor_changer "$OPTION"
 		if [ "$OPTION" == "ondemand" ] || [ "$OPTION" == "conservative" ]; then
-			if (whiptail --title "Governor Threshold" --yes-button "Change Threshold" --no-button "No don't change"  --yesno "Would you like to change to threshold at which CPU clocks at max speed? (0-100)" 10 60) then		
+			if (whiptail --title "Governor Threshold" --yes-button "Change Threshold" --no-button "No don't change"  --yesno "Would you like to change to threshold at which CPU clocks at max speed? (0-100)" 10 60) then
 				if [[ "$OPTION" == "conservative" ]];then
 					threshold_input=$(whiptail --title "UP-Threshold Input" --inputbox "What is your desired threshold at which CPU clocks at max speed? (0-100)" 10 60 80 3>&1 1>&2 2>&3)
 				else
@@ -135,7 +135,7 @@ function threshold_input_handler {
 function show_state {
 if [ "$first_cmd_arg" == "-s" ] || [ "$first_cmd_arg" == "--show" ]; then
 	RESULT=$(cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor)
-	echo "Current Governor: $RESULT" 
+	echo "Current Governor: $RESULT"
 	CURRENT_FREQ=$(sudo cat /sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_cur_freq)
 	CURRENT_FREQ=$(expr "$CURRENT_FREQ" / 1000)
 	echo "Current CPU freq: $CURRENT_FREQ mhz"
@@ -198,15 +198,34 @@ function dialog_handler {
 	fi
 }
 
+function uninstall_handler {
+	if [ "$first_cmd_arg" == "-u" ] || [ "$first_cmd_arg" == "--uninstall" ]; then
+		read -p "Are you sure you want to uninstall cpu.gov? " -n 1 -r
+		echo    # (optional) move to a new line
+		if [[ ! $REPLY =~ ^[Yy]$ ]]
+		then
+			echo "Cancelled, did not uninstall"
+			exit
+	    [[ "$0" = "$BASH_SOURCE" ]] && exit 1 || return 1 # handle exits from shell or function but don't exit interactive shell
+		fi
+		sudo rm /usr/local/bin/cpu.gov
+		sudo rm /etc/init.d/cpu_gov.sh
+		echo "CPU.GOV is now uninstalled"
+		exit
+	fi
+}
+
+
 function help_display {
 	echo "Usage:"
 	echo ""
-	echo "start with no arguments -> start with gui to choose governor" 
+	echo "start with no arguments -> starts with gui to choose governor"
 	echo "-d	--dialog		use pseudo gui dialogs"
 	echo "-h	--help			display this help information"
 	echo "-s	--show			display active governor and threshold of ondemand if active"
 	echo "-g	--governor		give a valid cpu governor as argument two"
 	echo "-t	--treshold		changes governor to ondemand and give a valid ondemand threshold as argument two"
+	echo "-u	--uninstall 		removes cpu.gov from system (all changes back to kernel standard after reboot)"
 }
 
 function check_invalid_args_and_help {
@@ -229,5 +248,6 @@ show_state
 governor_cmd
 threshold_input_handler
 dialog_handler
+uninstall_handler
 check_invalid_args_and_help
 gui
