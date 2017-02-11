@@ -11,3 +11,5 @@ if [[ $(cat /etc/init.d/cpu_gov.sh  3>&1 1>&2 2>&3) == *"No such file or directo
 	update-rc.d cpu_gov.sh defaults
 fi
 cp ./cpu.gov.sh /usr/local/bin/cpu.gov
+chmod 755 /usr/local/bin/cpu.gov
+chmod +x /usr/local/bin/cpu.gov
