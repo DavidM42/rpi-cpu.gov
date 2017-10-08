@@ -1,5 +1,5 @@
 # rpi-cpu.gov
-Bash script to conveniently change raspberry pi governor and let this option persist through reboots
+After you've installed this script with it's convenient one line install method you are able to change the raspberry pi cpu governor. This change will be applied at every boot so you only have to change it one time. 
 
 ## Install
 
