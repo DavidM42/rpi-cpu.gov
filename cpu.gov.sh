@@ -19,7 +19,7 @@ function governor_changer {
 	  named='$named'
 	  time='$time'
 	  syslog='$syslog'
-	  echo -e "#!/bin/sh\n### BEGIN INIT INFO\n# Provides:          "$initd_file"\n# Required-Start:    $local_fs $network $named $time $syslog\n# Required-Stop:     $local_fs $network $named $time $syslog\n# Default-Start:     2 3 4 5\n# Default-Stop:      0 1 6\n# Description:       script to automatically set cpu governors and ondemand threshold to desired value at boot\n### END INIT INFO\n\nsudo echo $1 | sudo tee /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor" | sudo tee /etc/init.d/cpu_gov > /dev/null 2>&1
+	  echo -e "#!/bin/sh\n### BEGIN INIT INFO\n# Provides:          "$initd_file"\n# Required-Start:    $local_fs $network $named $time $syslog\n# Required-Stop:     $local_fs $network $named $time $syslog\n# Default-Start:     2 3 4 5\n# Default-Stop:      0 1 6\n# Description:       Script to automatically set cpu governors and ondemand threshold to desired value at boot\n### END INIT INFO\n\nsudo echo $1 | sudo tee /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor" | sudo tee /etc/init.d/cpu_gov > /dev/null 2>&1
 	  echo "Success: Set governor to $RESULT"
     else
       echo "Failed. You probably don't have sudo rights"
@@ -93,13 +93,13 @@ function change_up_threshold {
 			echo $1 | sudo tee /sys/devices/system/cpu/cpufreq/"$governor"/up_threshold > /dev/null 2>&1
 			echo "echo $1 | sudo tee /sys/devices/system/cpu/cpufreq/$governor/up_threshold" | sudo tee --append /etc/init.d/cpu_gov > /dev/null 2>&1
 		else
-			echo "failed to chanage threshold. Not the correct governor."
+			echo "Failed to change threshold. Not the correct governor."
 		fi
 	fi
 }
 
 function threshold_input_handler {
-	if [ "$first_cmd_arg" == "-t" ] || [ "$first_cmd_arg" == "--treshold" ]; then
+	if [ "$first_cmd_arg" == "-t" ] || [ "$first_cmd_arg" == "--threshold" ]; then
 		governor=$(cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor)
 		if [[ "$governor" != "ondemand" ]] && [[ "$governor" != "conservative" ]]; then
 			PS3='Which governor that supports thresholds should be activated: '
@@ -160,7 +160,7 @@ function dialog_handler {
 					;;
 				"ondemand")
 					governor_changer "ondemand"
-					read -p "change CPU boost threshold (empty leaves default): " threshold
+					read -p "Change CPU boost threshold (empty leaves default): " threshold
 					threshold=${threshold:-95}
 					if [[ $threshold != 95 ]]; then
 						change_up_threshold $threshold
@@ -180,7 +180,7 @@ function dialog_handler {
 
 				"conservative")
 					governor_changer "conservative"
-					read -p "change CPU boost threshold (empty leaves default): " threshold
+					read -p "Change CPU boost threshold (empty leaves default): " threshold
 					threshold=${threshold:-80}
 					if [[ $threshold != 80 ]]; then
 						change_up_threshold $threshold
@@ -229,7 +229,7 @@ function help_display {
 	echo "-h	--help			display this help information"
 	echo "-s	--show			display active governor and threshold of ondemand if active"
 	echo "-g	--governor		give a valid cpu governor as argument two"
-	echo "-t	--treshold		changes governor to ondemand and give a valid ondemand threshold as argument two"
+	echo "-t	--threshold		changes governor to ondemand and give a valid ondemand threshold as argument two"
 	echo "-u	--uninstall 		removes cpu.gov from system (all changes back to kernel standard after reboot)"
 }
 
