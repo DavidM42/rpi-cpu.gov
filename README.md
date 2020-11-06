@@ -17,7 +17,7 @@ short long          effect
 `-h`	`--help`			display this help information  
 `-s`	`--show`			display active governor and threshold of ondemand if active  
 `-g`	`--governor`	give a valid cpu governor as second argument  
-`-t`	`--treshold`	changes governor to ondemand and give a valid ondemand threshold as argument two  
+`-t`	`--threshold`	changes governor to ondemand and give a valid ondemand threshold as argument two  
 `-u`	`--uninstall` removes cpu.gov from system (all changes back to kernel standard after reboot)  
 
 Use it like this ```cpu.gov -g ondemand```  
